@@ -81,22 +81,23 @@ def aplicar_colores_html(texto):
         if not linea.strip():
             resultado.append('<br>')
             continue
-        palabras = re.findall(r"(\w+|\W+)", linea)
-        linea_coloreada = []
-        for segmento in palabras:
+        
+        # Procesar cada línea manteniendo el formato original
+        linea_procesada = []
+        for segmento in re.findall(r"([a-zA-Z']+|\W+)", linea):  # Regex mejorado
             if segmento.strip():
-                palabra_limpia = re.sub(r'[^a-zA-Z\']', '', segmento.lower())
+                palabra_limpia = segmento.lower().strip(".,!?;:\"'")
                 color = obtener_color(palabra_limpia)
                 if color:
-                    base = re.sub(r'[^a-zA-Z\']', '', segmento)
-                    resto = segmento[len(base):] if base else segmento
-                    linea_coloreada.append(
-                        f'<span style="border-bottom: 2px solid {color}">{base}</span>{resto}')
+                    linea_procesada.append(
+                        f'<span style="color: black; border-bottom: 2px solid {color}">{segmento}</span>'
+                    )
                 else:
-                    linea_coloreada.append(segmento)
+                    linea_procesada.append(segmento)
             else:
-                linea_coloreada.append(segmento)
-        resultado.append(''.join(linea_coloreada))
+                linea_procesada.append(segmento)
+        
+        resultado.append(''.join(linea_procesada))
     return '<br>'.join(resultado)
 
 # ====================== FUNCIONES PARA ARCHIVOS ======================
@@ -159,9 +160,12 @@ def main():
             padding: 20px;
             border-radius: 5px;
             white-space: pre-wrap;
+            color: black !important;  /* Fuerza texto negro */
+            font-size: 16px;
+            line-height: 1.8;
         }
-        .stTextArea textarea {
-            min-height: 200px;
+        .texto-coloreado span {
+            color: black !important;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -229,7 +233,7 @@ def main():
                 
                 # Exportar a HTML
                 html_full = f"""<!DOCTYPE html>
-<html>
+    <html>
 <head>
     <meta charset="UTF-8">
     <title>Documento Exportado</title>
